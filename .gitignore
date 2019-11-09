@@ -1,0 +1,5 @@
+raw_data/
+preprocessed_data/
+out/
+.idea/
+__pycache__/
