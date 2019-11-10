@@ -1,6 +1,7 @@
 from torch.utils.data import DataLoader
 from torchvision import transforms, datasets
 from model.VanilaCNN import VanilaCNN
+from torch.utils.tensorboard import SummaryWriter
 import torch.nn as nn
 import torch.optim as optim
 import torch
@@ -54,6 +55,11 @@ class Trainer:
         train_loader = DataLoader(train_data, batch_size=self.batch_size)
 
         loss_arr = []
+        accuracy_arr = []
+        total = 0
+        correct = 0
+        writer = SummaryWriter()
+        train_iter = 0
         for i in range(self.epoch):
             for j, [image, label] in enumerate(train_loader):
                 x = image.to(device)
@@ -61,16 +67,30 @@ class Trainer:
 
                 self.optimizer.zero_grad()
                 output = self.model.forward(x)
+                total += y_.size(0)
+                correct += (torch.abs(torch.argmax(output, dim=1) - y_) <= 5).sum().float()
+                accuracy = (correct / total) * 100
+                print(accuracy)
+                accuracy_arr.append(accuracy)
                 loss = self.loss_func(output, y_)
                 loss_arr.append(loss.cpu().detach().numpy())
                 loss.backward()
                 self.optimizer.step()
 
                 print(loss)
-                if j == 50:
+                if j % 5 == 0:
+                    writer.add_scalar('Loss/train', loss.item(), train_iter)
+                    writer.add_scalar('Accuracy/train', accuracy.item(), train_iter)
+                    train_iter += 1
+                if j == 100:
                     break
-
-
+        print(accuracy_arr)
+        plt.plot(accuracy_arr)
+        plt.title('trian_accuracy')
+        plt.xlabel('1 batch')
+        plt.ylabel('train_accuracy')
+        plt.savefig('./out/train_acc.png')
+        plt.close()
 
 
 def train_models():
@@ -83,7 +103,7 @@ def train_models():
     if not os.path.exists(vanila_path):
         model_trainer.set_model(vanila_model)
         model_trainer.train()
-       # torch.save(vanila_model, vanila_path)
+    # torch.save(vanila_model, vanila_path)
 
 
 if __name__ == '__main__':

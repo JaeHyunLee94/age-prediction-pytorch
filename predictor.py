@@ -1,3 +1,12 @@
+
+
+
+
+def predict_vanila(img):
+
+    pass
+
+
 def predict_all():
     pass
 
