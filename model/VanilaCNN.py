@@ -1,8 +1,11 @@
 import torch.nn as nn
-
-
+import torch
+'''
+batch_norm 넣기
+'''
 class VanilaCNN(nn.Module):
     def __init__(self):
+        super(VanilaCNN,self).__init__()
         self.cnn_layer = nn.Sequential(
             nn.Conv2d(3, 16, 5),
             nn.ReLU(),
@@ -14,9 +17,9 @@ class VanilaCNN(nn.Module):
             nn.MaxPool2d(2, 2)
         )
         self.fc_layer = nn.Sequential(
-            nn.Linear(64 * 3 * 3, 100),
+            nn.Linear(173056, 50),
             nn.ReLU(),
-            nn.Linear(100, 10)
+            nn.Linear(50, 100)
         )
 
     def forward(self, x):
