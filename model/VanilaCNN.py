@@ -1,11 +1,14 @@
 import torch.nn as nn
 import torch
+
 '''
 batch_norm 넣기
 '''
+
+
 class VanilaCNN(nn.Module):
     def __init__(self):
-        super(VanilaCNN,self).__init__()
+        super(VanilaCNN, self).__init__()
         self.cnn_layer = nn.Sequential(
             nn.Conv2d(3, 16, 5),
             nn.ReLU(),
@@ -27,6 +30,3 @@ class VanilaCNN(nn.Module):
         out = out.view(out.size(0), -1)
         out = self.fc_layer(out)
         return out
-
-
-
