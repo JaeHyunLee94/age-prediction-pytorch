@@ -4,6 +4,8 @@
 
 def predict_vanila(img):
 
+
+
     pass
 
 
