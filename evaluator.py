@@ -11,7 +11,7 @@ vanila_path = './model/vanila.pt'
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-def evaluate(self, model, batch_size=20):
+def evaluate( model, batch_size=20):
     writer = SummaryWriter()
     loss_func = nn.CrossEntropyLoss()
 
