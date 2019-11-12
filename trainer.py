@@ -1,6 +1,7 @@
 from torch.utils.data import DataLoader
 from torchvision import transforms, datasets
 from model.VanilaCNN import VanilaCNN
+import model.Resnet as Resnet
 from torch.utils.tensorboard import SummaryWriter
 import torch.nn as nn
 import torch.optim as optim
@@ -24,7 +25,7 @@ class Trainer:
     def set_model(self, model):
         self.model = model
 
-    def set_optimizer(self, optimizer_name='SGD'):
+    def set_optimizer(self, optimizer_name='Adam'):
         if optimizer_name == 'Adam':
             self.optimizer = optim.Adam(self.model.parameters(), lr=self.lr)
         elif optimizer_name == 'SGD':
@@ -36,7 +37,7 @@ class Trainer:
         elif loss_name == 'MSE':
             self.loss_func = nn.MSELoss()
 
-    def set_hyperparameter(self, lr=0.01, batch_size=10, epoch=2): #조정!: 128,50?
+    def set_hyperparameter(self, lr=0.01, batch_size=20, epoch=5):  # 조정!: 128,50?
         self.lr = lr
         self.batch_size = batch_size
         self.epoch = epoch
@@ -50,18 +51,21 @@ class Trainer:
             [transforms.Resize(255),
              transforms.CenterCrop(224),
              transforms.ToTensor(),
-             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]), #의미?
+             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),  # 의미?
              ]))
         train_loader = DataLoader(train_data, batch_size=self.batch_size, shuffle=True)
 
         loss_arr = []
         accuracy_arr = []
-        total = 0
-        correct = 0
+
         writer = SummaryWriter()
         train_iter = 0
         for i in range(self.epoch):
             for j, [image, label] in enumerate(train_loader):
+
+                total = 0
+                correct = 0
+
                 x = image.to(device)
                 y_ = label.to(device)
 
@@ -78,7 +82,7 @@ class Trainer:
                 self.optimizer.step()
 
                 print('Real time loss: ', loss)
-                if j % 5 == 0: # 언제 print?
+                if j % 5 == 0:  # 언제 print?
                     writer.add_scalar('Loss/train', loss.item(), train_iter)
                     writer.add_scalar('Accuracy/train', accuracy.item(), train_iter)
                     train_iter += 1
@@ -95,15 +99,31 @@ class Trainer:
 
 def train_models():
     vanila_path = './model/vanila.pt'
+    res4_path = './model/res4.pt'
+    res7_path = './model/res7.pt'
 
     vanila_model = VanilaCNN()
+    res4_model = Resnet.resnet4()
+    res7_model = Resnet.resnet7()
 
     model_trainer = Trainer(vanila_model)
 
     if not os.path.exists(vanila_path):
+        pass
         model_trainer.set_model(vanila_model)
         model_trainer.train()
         torch.save(vanila_model, vanila_path)
+
+    if not os.path.exists(res4_path):
+        pass
+        model_trainer.set_model(res4_model)
+        model_trainer.train()
+        torch.save(res4_model, res4_path)
+
+    if not os.path.exists(res7_path):
+        model_trainer.set_model(res7_model)
+        model_trainer.train()
+        torch.save(res7_model, res7_path)
 
 
 if __name__ == '__main__':

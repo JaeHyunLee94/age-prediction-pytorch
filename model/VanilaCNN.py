@@ -1,5 +1,5 @@
-import torch.nn as nn
 import torch
+import torch.nn as nn
 
 '''
 batch_norm 넣기
@@ -28,7 +28,6 @@ class VanilaCNN(nn.Module):
             nn.ReLU(),
             nn.Linear(50, 100)
         )
-
 
     def forward(self, x):
         out = self.cnn_layer(x)
