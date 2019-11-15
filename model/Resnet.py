@@ -1,5 +1,5 @@
-import torch
 import torch.nn as nn
+import torchvision.models.resnet as resnet
 
 
 class BasicBlock(nn.Module):
@@ -82,7 +82,7 @@ class ResNet(nn.Module):
 
         self.block_layer = nn.Sequential(*layer_arr)
         self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
-
+        self.relu = nn.ReLU()
         self.fc = nn.Linear(self.in_channel, 100)
 
     def forward(self, x):
@@ -91,14 +91,29 @@ class ResNet(nn.Module):
         x = self.avg_pool(x)
         x = x.view(x.size(0), -1)
         x = self.fc(x)
+        x = self.relu(x)
         return x
 
 
-def resnet4():
-    model = ResNet(BasicBlock, [64, 128, 128, 64])
+def get_resnet6():
+    model = ResNet(BasicBlock, [64, 128, 256])
     return model
 
 
-def resnet7():
-    model = ResNet(BottleNeck, [64, 128, 128, 128, 128, 128, 64])
+def get_resnet12():
+    model = ResNet(BottleNeck, [64, 128, 128, 128, 64])
+    return model
+
+
+def get_resnet18():
+    model = resnet.resnet18(pretrained=False)
+    in_features = model.fc.in_features
+    model.fc = nn.Linear(in_features, 100)
+    return model
+
+
+def get_resnet34():
+    model = resnet.resnet34(pretrained=False)
+    in_features = model.fc.in_features
+    model.fc = nn.Linear(in_features, 100)
     return model

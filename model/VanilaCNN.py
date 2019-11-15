@@ -1,11 +1,8 @@
-import torch
 import torch.nn as nn
 
 '''
-batch_norm 넣기
+batch norm?
 '''
-
-
 class VanilaCNN(nn.Module):
     def __init__(self):
         super(VanilaCNN, self).__init__()

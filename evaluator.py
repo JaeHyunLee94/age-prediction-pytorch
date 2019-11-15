@@ -8,12 +8,14 @@ from torchvision import transforms, datasets
 
 test_dir = './preprocessed_data/test'
 vanila_path = './model/vanila.pt'
+res18_path = './model/res18.pt'
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-def evaluate( model, batch_size=20):
+def evaluate(model, batch_size=128):
     writer = SummaryWriter()
-    loss_func = nn.CrossEntropyLoss()
+    loss_func = nn.CrossEntropyLoss() # model.lossfunc
+    model.eval()
 
     test_data = datasets.ImageFolder(test_dir, transform=transforms.Compose(
         [transforms.Resize(255),
@@ -38,9 +40,11 @@ def evaluate( model, batch_size=20):
             test_loss = loss_func(output, y_)
 
             total += label.size(0)
-            correct += (torch.abs(output_index - y_) <= 3).sum().float()
+            correct += (torch.abs(output_index - y_) <= 5).sum().float()
 
             accuracy = 100 * correct / total
+
+            print('test accuracy: ',accuracy)
 
             # Tensorboard : test_loss
             writer.add_scalar('Loss/test', test_loss.item(), test_iter)
@@ -54,10 +58,9 @@ def evaluate( model, batch_size=20):
 
 
 def evaluate_models():
-
-    vanila_model = torch.load(vanila_path)
-
-    evaluate(model=vanila_model, batch_size=20)
+    # vanila_model = torch.load(vanila_path)
+    res18_model = torch.load(res18_path)
+    evaluate(model=res18_model, batch_size=128)
 
 
 if __name__ == '__main__':

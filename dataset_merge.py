@@ -17,9 +17,9 @@ class ImagePreprocessor:
         self.completed_dir = './preprocessed_data/'
 
     def preprocess(self):
-        self.preprocess_megaage()
-        self.preprocess_megaage()
-        self.preprocess_wiki()
+        self.preprocess_megaage_asian()
+        #self.preprocess_megaage()
+        #self.preprocess_wiki()
 
     def preprocess_megaage(self):
         mega_fname = [self.megaage_dir + 'train/' + str(name) + '.jpg' for name in range(8531, 41942)]
@@ -28,7 +28,7 @@ class ImagePreprocessor:
             mega_label = f.read().split('\n')
 
         for i, fname in enumerate(mega_fname):
-            break
+
             print('preprocessing MegaAge data...' + fname)
 
             dir_name = mega_label[i]
@@ -70,6 +70,7 @@ class ImagePreprocessor:
 
             dst = self.completed_dir + 'train/' + mega_label[i] + '/m' + str(i) + '.jpg'
             shutil.copy2(fname, dst)
+
 
         mega_fname_test = [self.megaageasian_dir + 'test/' + str(name) + '.jpg' for name in range(1, 3946)]
 
@@ -118,8 +119,6 @@ def main():
     if not os.path.isfile('./out/prepro_flag.bin'):
         prepro = ImagePreprocessor()
         prepro.preprocess()
-        with open('./out/prepro_flag.bin', 'wb') as f:
-            pass
 
 
 if __name__ == '__main__':
