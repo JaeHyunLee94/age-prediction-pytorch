@@ -7,8 +7,8 @@ from torch.utils.tensorboard import SummaryWriter
 from torchvision import transforms, datasets
 
 test_dir = './preprocessed_data/test'
-vanila_path = './model/vanila.pt'
-res18_path = './model/res18.pt'
+vanila_path = './trained_model/vanila.pt'
+res18_path = './trained_model/res18.pt'
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
@@ -43,16 +43,16 @@ def evaluate(model, batch_size=128):
             correct += (torch.abs(output_index - y_) <= 5).sum().float()
 
             accuracy = 100 * correct / total
-
+            print('test_loss: ',test_loss )
             print('test accuracy: ',accuracy)
 
             # Tensorboard : test_loss
-            writer.add_scalar('Loss/test', test_loss.item(), test_iter)
-            test_iter += 1
+            #writer.add_scalar('Loss/test', test_loss.item(), test_iter)
+            #test_iter += 1
 
             # Tensorboard : test_Accuracy
-            writer.add_scalar('Accuracy/test', accuracy.item(), test_acc_iter)
-            test_acc_iter += 1
+            #writer.add_scalar('Accuracy/test', accuracy.item(), test_acc_iter)
+            #test_acc_iter += 1
 
         print("Accuracy of Test Data : {}".format(100 * correct / total))
 

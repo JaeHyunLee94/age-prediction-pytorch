@@ -10,8 +10,6 @@ from torch.utils.tensorboard import SummaryWriter
 import torch.nn as nn
 import torch.optim as optim
 import torch
-import os
-import gc
 
 '''
 __init__ 에 optimizer 에 따른 if 문
@@ -40,7 +38,7 @@ class Trainer:
         elif loss_name == 'MSE':
             self.loss_func = nn.MSELoss()
 
-    def set_hyperparameter(self, lr=0.01, batch_size=128, epoch=15):  # 조정!: 128,50?
+    def set_hyperparameter(self, lr=0.005, batch_size=128, epoch=1):  # 조정!: 128,50?
         self.lr = lr
         self.batch_size = batch_size
         self.epoch = epoch
@@ -84,7 +82,7 @@ class Trainer:
 
                 print('Real time loss: ', loss)
 
-                if j % 10 == 0:  # 언제 print?
+                if j % 100 == 0:  # 언제 print?
                     writer.add_scalar('Loss/train', loss.item(), train_iter)
                     writer.add_scalar('Accuracy/train', accuracy.item(), train_iter)
                     train_iter += 1
@@ -112,14 +110,14 @@ def train_models():
     inceptionv3_path = './trained_model/inceptionv3.pt'
 
 
-    res18_model = Resnet.get_resnet18()
+    res18_model = torch.load(res18_path)
 
     model_trainer = Trainer(res18_model)
 
-    if not os.path.exists(res18_path):
-        model_trainer.set_model(res18_model)
-        model_trainer.train()
-        torch.save(res18_model, res18_path)
+    #if not os.path.exists(res18_path):
+    model_trainer.set_model(res18_model)
+    model_trainer.train()
+    torch.save(res18_model, res18_path)
 
 
 if __name__ == '__main__':

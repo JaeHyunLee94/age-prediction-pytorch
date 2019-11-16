@@ -10,11 +10,9 @@ def face_detector(img):
 
     faces = face_cascade.detectMultiScale(gray, 1.3, 5)
 
-    img_list=[]
+    img_list = []
     for (x, y, w, h) in faces:
-        cropped = img[y - int(h / 4):y + h + int(h / 4), x - int(w / 4):x + w + int(w / 4)]
+        cropped = img[y:y + int(h / 2), x:x + int(w / 2)]
+
         img_list.append(cropped)
-
     return img_list
-
-
