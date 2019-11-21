@@ -4,11 +4,11 @@ import torch.nn as nn
 
 def get_densenet121():
     model = densenet.densenet121()
-    model.fc = nn.Linear(200, 100)
+    model.fc = nn.Linear(200, 1)
     return model
 
 
 def get_densenet161():
     model = densenet.densenet161()
-    model.fc = nn.Linear(200, 100)
+    model.fc = nn.Linear(200, 1)
     return model

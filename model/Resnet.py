@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torchvision.models.resnet as resnet
+import torch
 
 
 class BasicBlock(nn.Module):
@@ -96,7 +97,7 @@ class ResNet(nn.Module):
 
 
 def get_resnet6():
-    model = ResNet(BasicBlock, [64, 128, 256])
+    model = ResNet(BasicBlock, [64, 32, 32])
     return model
 
 
@@ -116,4 +117,10 @@ def get_resnet34():
     model = resnet.resnet34(pretrained=False)
     in_features = model.fc.in_features
     model.fc = nn.Linear(in_features, 100)
+    return model
+
+def get_restnet55():
+    model=resnet.resnet50(pretrained=False)
+    in_features=model.fc.in_features
+    model.fc=nn.Linear(in_features,100)
     return model
