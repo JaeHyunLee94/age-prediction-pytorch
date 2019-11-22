@@ -18,7 +18,7 @@ age_tensor = torch.tensor([i for i in range(1, 101)]).type(torch.FloatTensor).to
 
 
 def evaluate(model, batch_size=128):
-    writer = SummaryWriter()
+    writer = SummaryWriter() # logdir 설정
     loss_func = nn.L1Loss()
     model.eval()
 
@@ -29,11 +29,7 @@ def evaluate(model, batch_size=128):
          transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
          ]))  # normalize?
     test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True)
-
-    total = 0
-    correct = 0
     test_iter = 0
-    test_acc_iter = 0
     with torch.no_grad():
         for i, [image, label] in enumerate(test_loader):
             x = image.to(device)
@@ -44,24 +40,11 @@ def evaluate(model, batch_size=128):
             output = (output * age_tensor).sum(dim=1)
             test_loss = loss_func(output, y_)
 
-            total += y_.size(0)
-
-            correct += ((output - y_ <= 5) * (output - y_ >= -5)).sum().float()
-
-            accuracy = (correct / total) * 100
-
             print('test_loss: ', test_loss)
-            print('test accuracy: ', accuracy)
 
             # Tensorboard : test_loss
-            # writer.add_scalar('Loss/test', test_loss.item(), test_iter)
-            # test_iter += 1
-
-            # Tensorboard : test_Accuracy
-            # writer.add_scalar('Accuracy/test', accuracy.item(), test_acc_iter)
-            # test_acc_iter += 1
-
-        print("Accuracy of Test Data : {}".format(100 * correct / total))
+            writer.add_scalar('Loss/test', test_loss.item(), test_iter)
+            test_iter += 1
 
 
 def evaluate_models():

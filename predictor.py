@@ -3,10 +3,12 @@ import cv2
 import numpy as np
 import torchvision.transforms as transforms
 import torch.nn.functional as F
+import os
 from detector import face_detector
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 age_tensor = torch.tensor([i for i in range(1, 101)]).type(torch.FloatTensor).to(device)
+path_dir = './video/'
 
 
 def image_loader(image):
@@ -25,22 +27,20 @@ def image_loader(image):
     return image.to(device)  # assumes that you're using CPU
 
 
-def predict_res18(img):
-    res18_path = './trained_model/res18.pt'
-
-    res18_model = torch.load(res18_path)
-    res18_model.eval()
+def predict_res18(img,res18_model):
 
     faces, img_list = face_detector(img)
     if not img_list:
         return img
 
-    output = res18_model(image_loader(img_list[0]))
-    output = F.softmax(output, dim=1)
-    output = (output * age_tensor).sum(dim=1)
+    out_list = []
+    for face_img in img_list:
+        output = res18_model(image_loader(face_img))
+        output = F.softmax(output, dim=1)
+        output = (output * age_tensor).sum(dim=1)
+        out_list.append(output)
 
-    print(output)
-    for (x, y, w, h), age in zip(faces, output):
+    for (x, y, w, h), age in zip(faces, out_list):
         img = cv2.rectangle(img, pt1=(x, y), pt2=(x + int(w), y + int(h)), color=(255, 0, 0))
         cv2.putText(img, text='Age: {:.3f}'.format(age.item(), 3), org=(x, y), fontFace=cv2.FONT_HERSHEY_DUPLEX,
                     fontScale=0.3,
@@ -49,29 +49,33 @@ def predict_res18(img):
     return img
 
 
-def predict_all():
-    img = cv2.imread('./out/face_ex3.jpeg')
-    cv2.imshow('sdf', predict_res18(img))
-    cv2.waitKey(0)
-    cap = cv2.VideoCapture(0)
+def video_stream():
+    video_file_list = os.listdir(path_dir)
+    res18_path = './trained_model/res18.pt'
 
-    if cap.isOpened():
-        print('webcap had opened')
+    res18_model = torch.load(res18_path)
+    res18_model.eval()
 
-    while True:
-        ret, frame = cap.read()
+    for file_name in video_file_list:
 
-        if ret:
-            if cv2.waitKey(10) & 0XFF == ord('q'):
+        cap = cv2.VideoCapture(path_dir+file_name)
+
+        if cap.isOpened():
+            print('succecfully streaming')
+        while True:
+            ret, frame = cap.read()
+
+            if ret:
+                if cv2.waitKey(1) & 0XFF == ord('q'):
+                    break
+                cv2.imshow(file_name, predict_res18(frame,res18_model))
+
+            else:
                 break
-            cv2.imshow('video', predict_res18(frame))
 
-        else:
-            print('error')
-
-    cap.release()
-    cv2.destroyAllWindows()
+        cap.release()
+        cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':
-    predict_all()
+    video_stream()

@@ -11,7 +11,7 @@ def face_detector(img):
 
     img_list = []
     for (x, y, w, h) in faces:
-        cropped = img[y:y + int(h / 2), x:x + int(w / 2)]
+        cropped = img[y:y + h, x:x + w]
 
         img_list.append(cropped)
     return faces, img_list

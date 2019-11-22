@@ -12,6 +12,7 @@ import torch.optim as optim
 import torch
 import torch.nn.functional as F
 import os
+from sampler import ImbalancedDatasetSampler
 
 '''
 __init__ 에 optimizer 에 따른 if 문
@@ -21,6 +22,20 @@ train_dir = './preprocessed_data/train'
 validation_dir = './preprocessed_data/validation'
 age_tensor = torch.tensor([i for i in range(1, 101)]).type(torch.FloatTensor).to(device)
 
+data_transforms = {
+    'train': transforms.Compose([transforms.Resize(255),
+                                 transforms.CenterCrop(224),
+                                 transforms.RandomHorizontalFlip(),
+                                 transforms.ToTensor(),
+                                 transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),  # 의미?
+                                 ]),
+    'val': transforms.Compose([transforms.Resize(255),
+                               transforms.CenterCrop(224),
+                               transforms.ToTensor(),
+                               transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),  # 의미?
+                               ]),
+}
+
 
 class Trainer:
     def __init__(self, model):
@@ -28,15 +43,24 @@ class Trainer:
         self.set_hyperparameter()
         self.set_optimizer()
         self.set_loss()
+        self.set_lr_schedule()
 
     def set_model(self, model):
         self.model = model
 
-    def set_optimizer(self, optimizer_name='SGD'):
+    def set_optimizer(self, optimizer_name='Adam'):
         if optimizer_name == 'Adam':
-            self.optimizer = optim.Adam(self.model.parameters(), lr=self.lr)
+            self.optimizer = optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=self.weight_dacay)
         elif optimizer_name == 'SGD':
             self.optimizer = optim.SGD(self.model.parameters(), lr=self.lr, weight_decay=self.weight_dacay)
+        elif optimizer_name == 'RMSprop':
+            self.optimizer = optim.RMSprop(self.model.parameters(), lr=self.lr, weight_decay=self.weight_dacay)
+        elif optimizer_name == 'AdaGrad':
+            self.optimizer = optim.Adagrad(self.model.parameters(), lr=self.lr, weight_decay=self.weight_dacay)
+        elif optimizer_name == 'Adadelta':
+            self.optimizer = optim.Adadelta(self.model.parameters(), lr=self.lr, weight_decay=self.weight_dacay)
+        else:
+            raise ModuleNotFoundError
 
     def set_loss(self, loss_name='L1Loss'):
         if loss_name == 'XEntropy':
@@ -45,30 +69,30 @@ class Trainer:
             self.loss_func = nn.MSELoss(reduction='mean')
         elif loss_name == 'L1Loss':
             self.loss_func = nn.L1Loss(reduction='mean')
+        else:
+            raise ModuleNotFoundError
 
-    def set_hyperparameter(self, lr=0.005, batch_size=128, epoch=15, weight_decay=0):  # 조정!: 128,50?
+    def set_hyperparameter(self, lr=0.001, batch_size=256, epoch=30, weight_decay=0):  # 조정!: 128,50?
         self.lr = lr
         self.batch_size = batch_size
         self.epoch = epoch
         self.weight_dacay = weight_decay
 
+    def set_lr_schedule(self, step_size=10, gamma=0.1):
+        self.scheculer = optim.lr_scheduler.StepLR(self.optimizer, step_size=step_size, gamma=gamma)
+
     def train(self):
 
         self.model.to(device)
 
-        train_data = datasets.ImageFolder(train_dir, transform=transforms.Compose(
-            [transforms.Resize(255),
-             transforms.CenterCrop(224),
-             transforms.ToTensor(),
-             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),  # 의미?
-             ]))
+        train_data = datasets.ImageFolder(train_dir, transform=data_transforms['train'])
 
-        train_loader = DataLoader(train_data, batch_size=self.batch_size, shuffle=True, drop_last=True)
+        train_loader = DataLoader(train_data, batch_size=self.batch_size, sampler=ImbalancedDatasetSampler(train_data))
 
         writer = SummaryWriter()
         train_iter = 0
-        batch_iter = 0
-        val_acc = 0
+        validation_iter = 0
+
         val_loss = 999
         threshold = 0
 
@@ -78,10 +102,6 @@ class Trainer:
 
                 x = image.to(device)
                 y_ = label.type(torch.FloatTensor).to(device)
-
-                total = 0
-                correct = 0
-
                 self.optimizer.zero_grad()
                 output = self.model.forward(x)
                 output = F.softmax(output, dim=1)
@@ -90,52 +110,39 @@ class Trainer:
                 loss.backward()
                 self.optimizer.step()
 
-                total += y_.size(0)
-
-                correct += ((output - y_ <= 5) * (output - y_ >= -5)).sum().float()
-
-                accuracy = (correct / total) * 100
-
-                print('batch training Accuracy: ', accuracy)
                 print('Real time loss: ', loss)
                 print('Training Percesnt : --------{}%--------'.format(
                     100 * (self.batch_size * j + 93822 * i) / (self.epoch * 93822)))
 
                 if j % 50 == 0:  # 언제 print?
                     writer.add_scalar('Loss/train', loss.item(), train_iter)
-                    writer.add_scalar('Accuracy/train', accuracy.item(), train_iter)
                     train_iter += 1
-
-            val_acc_next, val_loss_next = self.validate()
-
-            if val_acc_next < val_acc:
+            self.scheculer.step()
+            val_loss_next = self.validate()
+            writer.add_scalar('Loss/Validation', val_loss_next.item(), train_iter)
+            validation_iter += 1
+            if val_loss_next > val_loss:
                 threshold += 1
             else:
                 threshold = 0
 
-            val_acc = val_acc_next
             val_loss = val_loss_next
 
             print(threshold)
 
-            if threshold > 2:
+            if threshold >= 2:
                 break
 
     def validate(self):
 
         self.model.eval()
 
-        validation_data = datasets.ImageFolder(validation_dir, transform=transforms.Compose(
-            [transforms.Resize(255),
-             transforms.CenterCrop(224),
-             transforms.ToTensor(),
-             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),  # 의미?
-             ]))  # validation 에서도 normalize?
+        validation_data = datasets.ImageFolder(validation_dir, transform=data_transforms['val'])
 
         validation_loader = DataLoader(validation_data, batch_size=self.batch_size, shuffle=True)
 
         total = 0
-        correct = 0
+
         val_iter = 0
 
         val_loss = 0
@@ -153,16 +160,13 @@ class Trainer:
 
                 total += y_.size(0)
 
-                correct += ((output - y_ <= 5) * (output - y_ >= -5)).sum().float()
-
                 if i % 5 == 0:
                     print('Validating model')
 
-        accuracy = 100 * correct / total
         val_loss_avg = val_loss / val_iter
-        print('validation accuracy: ', accuracy)
+
         print('validaion loss: ', val_loss_avg)
-        return accuracy, val_loss_avg
+        return val_loss_avg
 
 
 def train_models():
@@ -183,12 +187,12 @@ def train_models():
 
     inceptionv3_path = './trained_model/inceptionv3.pt'
 
-    res18_model = torch.load(res18_path)
+    res18_model = Resnet.get_resnet18()
 
     model_trainer = Trainer(res18_model)
 
-    #if not os.path.exists(res18_path):
-        # model_trainer.set_model(res6_model)
+    # if not os.path.exists(res18_path):
+    # model_trainer.set_model(res6_model)
     model_trainer.train()
     torch.save(res18_model, res18_path)
 
