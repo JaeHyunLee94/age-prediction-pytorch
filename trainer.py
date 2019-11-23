@@ -212,7 +212,6 @@ def train_models():
     del densenet121_model
 
     vgg11_model = VGG.get_vgg11()
-    #model_trainer=Trainer(vgg11_model)
     model_trainer.set_model(vgg11_model)
     model_trainer.set_hyperparameter(batch_size=56)
     model_trainer.train()
