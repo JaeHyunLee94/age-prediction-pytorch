@@ -84,7 +84,7 @@ class ResNet(nn.Module):
         self.block_layer = nn.Sequential(*layer_arr)
         self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
         self.relu = nn.ReLU()
-        self.fc = nn.Linear(self.in_channel, 100)
+        self.fc = nn.Linear(self.in_channel, 70)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -109,18 +109,18 @@ def get_resnet12():
 def get_resnet18():
     model = resnet.resnet18(pretrained=False)
     in_features = model.fc.in_features
-    model.fc = nn.Linear(in_features, 100)
+    model.fc = nn.Linear(in_features, 70)
     return model
 
 
 def get_resnet34():
     model = resnet.resnet34(pretrained=False)
     in_features = model.fc.in_features
-    model.fc = nn.Linear(in_features, 100)
+    model.fc = nn.Linear(in_features, 70)
     return model
 
 def get_restnet55():
     model=resnet.resnet50(pretrained=False)
     in_features=model.fc.in_features
-    model.fc=nn.Linear(in_features,100)
+    model.fc=nn.Linear(in_features,70)
     return model

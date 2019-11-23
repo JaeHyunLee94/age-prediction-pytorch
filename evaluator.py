@@ -1,5 +1,3 @@
-# model 이랑 img 넣으면 나이 추청
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -14,7 +12,7 @@ res18_path = './trained_model/res18.pt'
 squeeze1_0_path = './trained_model/squeeze1_0.pt'
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-age_tensor = torch.tensor([i for i in range(1, 101)]).type(torch.FloatTensor).to(device)
+age_tensor = torch.tensor([i for i in range(70)]).type(torch.FloatTensor).to(device)
 
 
 def evaluate(model, batch_size=128):
