@@ -103,6 +103,8 @@ class Trainer:
                 self.optimizer.zero_grad()
                 output = self.model.forward(x)
                 output = F.softmax(output, dim=1)
+                print(output.shape)
+                print(age_tensor.shape)
                 output = (output * age_tensor).sum(dim=1)
                 loss = self.loss_func(output, y_)
                 loss.backward()
@@ -204,14 +206,15 @@ def train_models():
 
     densenet121_model = DenseNet.get_densenet121()
     model_trainer.set_model(densenet121_model)
-    model_trainer.set_hyperparameter(batch_size=40)
+    model_trainer.set_hyperparameter(batch_size=36)
     model_trainer.train()
     torch.save(densenet121_model, densenet121_path)
     del densenet121_model
 
     vgg11_model = VGG.get_vgg11()
+    #model_trainer=Trainer(vgg11_model)
     model_trainer.set_model(vgg11_model)
-    model_trainer.set_hyperparameter(batch_size=60)
+    model_trainer.set_hyperparameter(batch_size=56)
     model_trainer.train()
     torch.save(vgg11_model, vgg11_path)
     del vgg11_model
