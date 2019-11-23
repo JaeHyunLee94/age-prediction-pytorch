@@ -204,14 +204,14 @@ def train_models():
 
     densenet121_model = DenseNet.get_densenet121()
     model_trainer.set_model(densenet121_model)
-    model_trainer.set_hyperparameter(batch_size=40)
+    model_trainer.set_hyperparameter(batch_size=36)
     model_trainer.train()
     torch.save(densenet121_model, densenet121_path)
     del densenet121_model
 
     vgg11_model = VGG.get_vgg11()
     model_trainer.set_model(vgg11_model)
-    model_trainer.set_hyperparameter(batch_size=60)
+    model_trainer.set_hyperparameter(batch_size=36)
     model_trainer.train()
     torch.save(vgg11_model, vgg11_path)
     del vgg11_model
