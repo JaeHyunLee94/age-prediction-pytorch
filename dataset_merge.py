@@ -18,7 +18,7 @@ class ImagePreprocessor:
 
     def preprocess(self):
         self.preprocess_megaage_asian()
-        self.preprocess_megaage()
+        # self.preprocess_megaage()
         # self.preprocess_wiki()
 
     def preprocess_megaage(self):
@@ -69,15 +69,23 @@ class ImagePreprocessor:
             mega_label = f.read().split('\n')
 
         for i, fname in enumerate(mega_fname):
-            break
+
             print('preprocessing MegaAge data...' + fname)
 
-            dir_name = mega_label[i]
-            if not os.path.exists(self.completed_dir + 'train/' + dir_name):
-                os.makedirs(self.completed_dir + 'train/' + dir_name)
+            if i < 36000:
+                dir_name = mega_label[i]
+                if not os.path.exists(self.completed_dir + 'train/' + dir_name):
+                    os.makedirs(self.completed_dir + 'train/' + dir_name)
 
-            dst = self.completed_dir + 'train/' + mega_label[i] + '/m' + str(i) + '.jpg'
-            shutil.copy2(fname, dst)
+                dst = self.completed_dir + 'train/' + mega_label[i] + '/m' + str(i) + '.jpg'
+                shutil.copy2(fname, dst)
+            else:
+                dir_name = mega_label[i]
+                if not os.path.exists(self.completed_dir + 'validate/' + dir_name):
+                    os.makedirs(self.completed_dir + 'validate/' + dir_name)
+
+                dst = self.completed_dir + 'validate/' + mega_label[i] + '/m' + str(i) + '.jpg'
+                shutil.copy2(fname, dst)
 
         mega_fname_test = [self.megaageasian_dir + 'test/' + str(name) + '.jpg' for name in range(1, 3946)]
 
@@ -87,20 +95,13 @@ class ImagePreprocessor:
         for i, fname in enumerate(mega_fname_test):
 
             print('preprocessing MegaAge data...' + fname)
-            if i < 2000:
-                dir_name = mega_label_test[i]
-                if not os.path.exists(self.completed_dir + 'test/' + dir_name):
-                    os.makedirs(self.completed_dir + 'test/' + dir_name)
-                dst = self.completed_dir + 'test/' + mega_label_test[i] + '/ma' + str(i) + '.jpg'
 
-                shutil.copy2(fname, dst)
-            else:
-                dir_name = mega_label_test[i]
-                if not os.path.exists(self.completed_dir + 'validation/' + dir_name):
-                    os.makedirs(self.completed_dir + 'validation/' + dir_name)
-                dst = self.completed_dir + 'validation/' + mega_label_test[i] + '/ma' + str(i) + '.jpg'
+            dir_name = mega_label_test[i]
+            if not os.path.exists(self.completed_dir + 'test/' + dir_name):
+                os.makedirs(self.completed_dir + 'test/' + dir_name)
+            dst = self.completed_dir + 'test/' + mega_label_test[i] + '/ma' + str(i) + '.jpg'
 
-                shutil.copy2(fname, dst)
+            shutil.copy2(fname, dst)
 
     def preprocess_wiki(self):
 

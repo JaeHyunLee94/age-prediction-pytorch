@@ -23,7 +23,7 @@ class VanilaCNN(nn.Module):
         self.fc_layer = nn.Sequential(
             nn.Linear(173056, 50),
             nn.ReLU(),
-            nn.Linear(50, 100)
+            nn.Linear(50, 70)
         )
 
     def forward(self, x):

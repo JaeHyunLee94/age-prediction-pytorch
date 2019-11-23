@@ -3,11 +3,10 @@ import cv2
 import numpy as np
 import torchvision.transforms as transforms
 import torch.nn.functional as F
-import os
 from detector import face_detector
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-age_tensor = torch.tensor([i for i in range(1, 101)]).type(torch.FloatTensor).to(device)
+age_tensor = torch.tensor([i for i in range(70)]).type(torch.FloatTensor).to(device)
 path_dir = './video/'
 
 
@@ -27,8 +26,7 @@ def image_loader(image):
     return image.to(device)  # assumes that you're using CPU
 
 
-def predict_res18(img,res18_model):
-
+def predict_res18(img, res18_model):
     faces, img_list = face_detector(img)
     if not img_list:
         return img
@@ -49,33 +47,30 @@ def predict_res18(img,res18_model):
     return img
 
 
-def video_stream():
-    video_file_list = os.listdir(path_dir)
+def real_time():
     res18_path = './trained_model/res18.pt'
 
     res18_model = torch.load(res18_path)
     res18_model.eval()
 
-    for file_name in video_file_list:
+    cap = cv2.VideoCapture(0)
 
-        cap = cv2.VideoCapture(path_dir+file_name)
+    if cap.isOpened():
+        print('succecfully streaming')
+    while True:
+        ret, frame = cap.read()
 
-        if cap.isOpened():
-            print('succecfully streaming')
-        while True:
-            ret, frame = cap.read()
-
-            if ret:
-                if cv2.waitKey(1) & 0XFF == ord('q'):
-                    break
-                cv2.imshow(file_name, predict_res18(frame,res18_model))
-
-            else:
+        if ret:
+            if cv2.waitKey(1) & 0XFF == ord('q'):
                 break
+            cv2.imshow('webcam', predict_res18(frame, res18_model))
 
-        cap.release()
-        cv2.destroyAllWindows()
+        else:
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':
-    video_stream()
+    real_time()

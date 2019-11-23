@@ -11,7 +11,6 @@ import torch.nn as nn
 import torch.optim as optim
 import torch
 import torch.nn.functional as F
-import os
 from sampler import ImbalancedDatasetSampler
 
 '''
@@ -20,7 +19,7 @@ __init__ 에 optimizer 에 따른 if 문
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 train_dir = './preprocessed_data/train'
 validation_dir = './preprocessed_data/validation'
-age_tensor = torch.tensor([i for i in range(1, 101)]).type(torch.FloatTensor).to(device)
+age_tensor = torch.tensor([i for i in range(70)]).type(torch.FloatTensor).to(device)
 
 data_transforms = {
     'train': transforms.Compose([transforms.Resize(255),
@@ -72,13 +71,13 @@ class Trainer:
         else:
             raise ModuleNotFoundError
 
-    def set_hyperparameter(self, lr=0.001, batch_size=256, epoch=30, weight_decay=0):  # 조정!: 128,50?
+    def set_hyperparameter(self, lr=0.001, batch_size=256, epoch=40, weight_decay=0.0000001):  # 조정!: 128,50?
         self.lr = lr
         self.batch_size = batch_size
         self.epoch = epoch
         self.weight_dacay = weight_decay
 
-    def set_lr_schedule(self, step_size=10, gamma=0.1):
+    def set_lr_schedule(self, step_size=5, gamma=0.5):
         self.scheculer = optim.lr_scheduler.StepLR(self.optimizer, step_size=step_size, gamma=gamma)
 
     def train(self):
@@ -99,7 +98,6 @@ class Trainer:
         for i in range(self.epoch):
             self.model.train()
             for j, [image, label] in enumerate(train_loader, 1):
-
                 x = image.to(device)
                 y_ = label.type(torch.FloatTensor).to(device)
                 self.optimizer.zero_grad()
@@ -114,9 +112,8 @@ class Trainer:
                 print('Training Percesnt : --------{}%--------'.format(
                     100 * (self.batch_size * j + 93822 * i) / (self.epoch * 93822)))
 
-                if j % 50 == 0:  # 언제 print?
-                    writer.add_scalar('Loss/train', loss.item(), train_iter)
-                    train_iter += 1
+            writer.add_scalar('Loss/train', loss.item(), train_iter)
+            train_iter += 1
             self.scheculer.step()
             val_loss_next = self.validate()
             writer.add_scalar('Loss/Validation', val_loss_next.item(), train_iter)
@@ -142,9 +139,7 @@ class Trainer:
         validation_loader = DataLoader(validation_data, batch_size=self.batch_size, shuffle=True)
 
         total = 0
-
         val_iter = 0
-
         val_loss = 0
         with torch.no_grad():
             for i, [image, label] in enumerate(validation_loader):
@@ -180,21 +175,46 @@ def train_models():
     squeeze1_0_path = './trained_model/squeeze1_0.pt'
     squeeze1_1_path = './trained_model/squeeze1_1.pt'
 
-    densenet121 = './trained_model/densenet121.pt'
-    densenet161 = './trained_model/densenet161.pt'
+    densenet121_path = './trained_model/densenet121.pt'
+    densenet161_path = './trained_model/densenet161.pt'
 
     vgg11_path = './trained_model/vgg11.pt'
 
     inceptionv3_path = './trained_model/inceptionv3.pt'
 
     res18_model = Resnet.get_resnet18()
-
     model_trainer = Trainer(res18_model)
-
-    # if not os.path.exists(res18_path):
-    # model_trainer.set_model(res6_model)
     model_trainer.train()
     torch.save(res18_model, res18_path)
+    del res18_model
+
+    res34_model = Resnet.get_resnet34()
+    model_trainer.set_model(res34_model)
+    model_trainer.set_hyperparameter(batch_size=156)
+    model_trainer.train()
+    torch.save(res34_model, res34_path)
+    del res34_model
+
+    squeeze1_0_model = SqueezeNet.get_squeezenet1_0()
+    model_trainer.set_model(squeeze1_0_model)
+    model_trainer.set_hyperparameter(batch_size=156)
+    model_trainer.train()
+    torch.save(squeeze1_0_model, squeeze1_0_path)
+    del squeeze1_0_model
+
+    densenet121_model = DenseNet.get_densenet121()
+    model_trainer.set_model(densenet121_model)
+    model_trainer.set_hyperparameter(batch_size=40)
+    model_trainer.train()
+    torch.save(densenet121_model, densenet121_path)
+    del densenet121_model
+
+    vgg11_model = VGG.get_vgg11()
+    model_trainer.set_model(vgg11_model)
+    model_trainer.set_hyperparameter(batch_size=60)
+    model_trainer.train()
+    torch.save(vgg11_model, vgg11_path)
+    del vgg11_model
 
 
 if __name__ == '__main__':
