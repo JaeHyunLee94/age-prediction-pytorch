@@ -6,11 +6,7 @@ import torch.nn.functional as F
 from detector import face_detector
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-<<<<<<< HEAD
 age_tensor = torch.tensor([i for i in range(1,101)]).type(torch.FloatTensor).to(device)
-=======
-age_tensor = torch.tensor([i for i in range(70)]).type(torch.FloatTensor).to(device)
->>>>>>> 2eefc0787a2de19b8aefd6ba423b430da88f5f81
 path_dir = './video/'
 
 
@@ -52,7 +48,6 @@ def predict_res18(img, res18_model):
 
 
 def real_time():
-<<<<<<< HEAD
     res18_path = './trained_model/squeeze1_0.pt'
 
     res18_model = torch.load(res18_path)
@@ -60,12 +55,6 @@ def real_time():
 
     img=cv2.imread('./out/asian2.jpg')
     cv2.imshow('sdf',predict_res18(img,res18_model))
-=======
-    res18_path = './trained_model/res18.pt'
-
-    res18_model = torch.load(res18_path)
-    res18_model.eval()
->>>>>>> 2eefc0787a2de19b8aefd6ba423b430da88f5f81
 
     cap = cv2.VideoCapture(0)
 
@@ -75,11 +64,7 @@ def real_time():
         ret, frame = cap.read()
 
         if ret:
-<<<<<<< HEAD
             if cv2.waitKey(20) & 0XFF == ord('q'):
-=======
-            if cv2.waitKey(1) & 0XFF == ord('q'):
->>>>>>> 2eefc0787a2de19b8aefd6ba423b430da88f5f81
                 break
             cv2.imshow('webcam', predict_res18(frame, res18_model))
 
