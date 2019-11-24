@@ -71,7 +71,7 @@ class Trainer:
         else:
             raise ModuleNotFoundError
 
-    def set_hyperparameter(self, lr=0.01, batch_size=128, epoch=60, weight_decay=0.0000000001):  # 조정!: 128,50?
+    def set_hyperparameter(self, lr=0.0001, batch_size=128, epoch=60, weight_decay=0):  # 조정!: 128,50?
         self.lr = lr
         self.batch_size = batch_size
         self.epoch = epoch
@@ -188,7 +188,7 @@ def train_models():
 
     vanila_model = VanilaCNN.get_vanila()
     model_trainer = Trainer(vanila_model)
-    model_trainer.set_hyperparameter(batch_size=128)
+    model_trainer.set_hyperparameter(batch_size=120)
     model_trainer.train()
     torch.save(vanila_model, vanila_path)
     del vanila_model, model_trainer
