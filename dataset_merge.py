@@ -1,6 +1,7 @@
 import glob
 import os
 import shutil
+from random import shuffle
 
 '''
 merging WIKI dataset and meagaAge asian dataset
@@ -14,10 +15,12 @@ class ImagePreprocessor:
         self.megaageasian_dir = './raw_data/megaage_asian/'
         self.megaage_dir = './raw_data/megaage/'
         self.wiki_dir = './raw_data/wiki_crop/'
+        self.utk_dir = './raw_data/UTKFace.tar/UTKFace/'
         self.completed_dir = './preprocessed_data/'
 
     def preprocess(self):
-        self.preprocess_megaage_asian()
+        self.preprocess_UTK()
+        # self.preprocess_megaage_asian()
         # self.preprocess_megaage()
         # self.preprocess_wiki()
 
@@ -28,7 +31,7 @@ class ImagePreprocessor:
             mega_label = f.read().split('\n')
 
         for i, fname in enumerate(mega_fname):
-
+            break
             print('preprocessing MegaAge data...' + fname)
 
             dir_name = mega_label[i]
@@ -47,12 +50,20 @@ class ImagePreprocessor:
 
             print('preprocessing MegaAge data...' + fname)
 
-            dir_name = mega_label_test[i]
-            if not os.path.exists(self.completed_dir + 'test/' + dir_name):
-                os.makedirs(self.completed_dir + 'test/' + dir_name)
-            dst = self.completed_dir + 'test/' + mega_label_test[i] + '/m' + str(i) + '.jpg'
+            if i < 4000:
+                dir_name = mega_label_test[i]
+                if not os.path.exists(self.completed_dir + 'test/' + dir_name):
+                    os.makedirs(self.completed_dir + 'test/' + dir_name)
+                dst = self.completed_dir + 'test/' + mega_label_test[i] + '/m' + str(i) + '.jpg'
 
-            shutil.copy2(fname, dst)
+                shutil.copy2(fname, dst)
+            else:
+                dir_name = mega_label_test[i]
+                if not os.path.exists(self.completed_dir + 'validation/' + dir_name):
+                    os.makedirs(self.completed_dir + 'validation/' + dir_name)
+                dst = self.completed_dir + 'validation/' + mega_label_test[i] + '/m' + str(i) + '.jpg'
+
+                shutil.copy2(fname, dst)
 
     def preprocess_megaage_asian(self):
         mega_fname = [self.megaageasian_dir + 'train/' + str(name) + '.jpg' for name in range(1, 40001)]
@@ -64,12 +75,20 @@ class ImagePreprocessor:
 
             print('preprocessing MegaAge data...' + fname)
 
-            dir_name = mega_label[i]
-            if not os.path.exists(self.completed_dir + 'train/' + dir_name):
-                os.makedirs(self.completed_dir + 'train/' + dir_name)
+            if i < 36000:
+                dir_name = mega_label[i]
+                if not os.path.exists(self.completed_dir + 'train/' + dir_name):
+                    os.makedirs(self.completed_dir + 'train/' + dir_name)
 
-            dst = self.completed_dir + 'train/' + mega_label[i] + '/m' + str(i) + '.jpg'
-            shutil.copy2(fname, dst)
+                dst = self.completed_dir + 'train/' + mega_label[i] + '/m' + str(i) + '.jpg'
+                shutil.copy2(fname, dst)
+            else:
+                dir_name = mega_label[i]
+                if not os.path.exists(self.completed_dir + 'validate/' + dir_name):
+                    os.makedirs(self.completed_dir + 'validate/' + dir_name)
+
+                dst = self.completed_dir + 'validate/' + mega_label[i] + '/m' + str(i) + '.jpg'
+                shutil.copy2(fname, dst)
 
         mega_fname_test = [self.megaageasian_dir + 'test/' + str(name) + '.jpg' for name in range(1, 3946)]
 
@@ -112,6 +131,35 @@ class ImagePreprocessor:
                 os.makedirs(self.completed_dir + 'train/' + dir_name)
 
             shutil.copy2(fname, self.completed_dir + 'train/' + dir_name + '/w' + str(i) + '.jpg')
+
+    def preprocess_UTK(self):
+
+        utk_fname = glob.iglob(self.utk_dir + '**/*.jpg', recursive=True)
+        utk_fname = list(utk_fname)
+
+        for i in range(3):
+            shuffle(utk_fname)
+
+        for i, fname in enumerate(utk_fname):
+            print('preprocessing utk data...' + fname)
+            age_str = fname.split('_')[1][25:]
+            print(age_str)
+            age = int(age_str)
+            if age > 100:
+                age = 100
+            age_str=str(age)
+
+            if i < 20000:
+                dir = self.completed_dir + 'train/'
+            elif i < 22000:
+                dir = self.completed_dir + 'validate/'
+            else:
+                dir = self.completed_dir + 'test/'
+
+            if not os.path.exists(dir + age_str):
+                os.makedirs(dir + age_str)
+
+            shutil.copy2(fname, dir + age_str + '/u' + str(i) + '.jpg')
 
 
 def main():

@@ -1,6 +1,9 @@
+video/
 raw_data/
 runs/
 preprocessed_data/
 out/
 .idea/
 __pycache__/
+data_distribution_fig/
+failed_model/

@@ -4,10 +4,12 @@ import torch.nn as nn
 
 def get_squeezenet1_0():
     model = squeezenet.squeezenet1_0()
-    model.fc = nn.Linear(100, 100)
+    model.classifier[1] = nn.Conv2d(512, 100, kernel_size=(1, 1), stride=(1, 1))
+
     return model
+
 
 def get_squeezenet1_1():
     model = squeezenet.squeezenet1_1()
-    model.fc = nn.Linear(100, 100)
+    model.classifier[1] = nn.Conv2d(512, 100, kernel_size=(1, 1), stride=(1, 1))
     return model
