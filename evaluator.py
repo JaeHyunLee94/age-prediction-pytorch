@@ -12,7 +12,11 @@ res18_path = './trained_model/res18.pt'
 squeeze1_0_path = './trained_model/squeeze1_0.pt'
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+<<<<<<< HEAD
 age_tensor = torch.tensor([i for i in range(1,101)]).type(torch.FloatTensor).to(device)
+=======
+age_tensor = torch.tensor([i for i in range(70)]).type(torch.FloatTensor).to(device)
+>>>>>>> 2eefc0787a2de19b8aefd6ba423b430da88f5f81
 
 
 def evaluate(model, batch_size=128):
@@ -48,7 +52,11 @@ def evaluate(model, batch_size=128):
 def evaluate_models():
     res18_model = torch.load('./trained_model/res18.pt')
 
+<<<<<<< HEAD
     evaluate(model=res18_model, batch_size=64)
+=======
+    evaluate(model=res18_model, batch_size=128)
+>>>>>>> 2eefc0787a2de19b8aefd6ba423b430da88f5f81
 
 
 if __name__ == '__main__':

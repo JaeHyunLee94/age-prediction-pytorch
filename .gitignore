@@ -5,5 +5,8 @@ preprocessed_data/
 out/
 .idea/
 __pycache__/
+<<<<<<< HEAD
 data_distribution_fig/
 failed_model/
+=======
+>>>>>>> 2eefc0787a2de19b8aefd6ba423b430da88f5f81

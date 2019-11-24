@@ -109,14 +109,20 @@ def get_resnet12():
 def get_resnet18():
     model = resnet.resnet18(pretrained=False)
     in_features = model.fc.in_features
-    model.fc = nn.Linear(in_features, 100)
+    model.fc = nn.Linear(in_features, 70)
     return model
 
 
 def get_resnet34():
     model = resnet.resnet34(pretrained=False)
     in_features = model.fc.in_features
-    model.fc = nn.Linear(in_features, 100)
+    model.fc = nn.Linear(in_features, 70)
+    return model
+
+def get_restnet55():
+    model=resnet.resnet50(pretrained=False)
+    in_features=model.fc.in_features
+    model.fc=nn.Linear(in_features,70)
     return model
 
 def get_restnet55():
