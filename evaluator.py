@@ -4,8 +4,9 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from torchvision import transforms, datasets
+from model import DenseNet as DenseNet
 
-test_dir = './preprocessed_data/test'
+test_dir = './preprocessed_data/validate'
 vanila_path = './trained_model/vanila.pt'
 res18_path = './trained_model/res18.pt'
 
@@ -46,9 +47,10 @@ def evaluate(model, batch_size=128):
 
 
 def evaluate_models():
-    res18_model = torch.load('./trained_model/res18.pt')
+    dense121=DenseNet.get_densenet161()
+    dense121.load_state_dict(torch.load('./trained_model/densenet161.pt'))
 
-    evaluate(model=res18_model, batch_size=64)
+    evaluate(model=dense121, batch_size=64)
 
 
 if __name__ == '__main__':

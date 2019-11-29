@@ -10,5 +10,5 @@ def get_densenet121():
 
 def get_densenet161():
     model = densenet.densenet161()
-    model.classifier = nn.Linear(1024, 100)
+    model.classifier = nn.Linear(2208, 100)
     return model

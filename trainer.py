@@ -155,7 +155,7 @@ class Trainer:
                 output = F.softmax(output, dim=1)
                 output = (output * age_tensor).sum(dim=1)
 
-                val_loss += self.loss_func(output, y_)
+                val_loss += self.loss_func(output, y_).item()
 
                 total += y_.size(0)
 
