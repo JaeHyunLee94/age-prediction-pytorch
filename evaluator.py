@@ -6,20 +6,21 @@ from torch.utils.tensorboard import SummaryWriter
 from torchvision import transforms, datasets
 from model import DenseNet as DenseNet
 
-test_dir = './preprocessed_data/validate'
+test_dir = './preprocessed_data/test'
 vanila_path = './trained_model/vanila.pt'
 res18_path = './trained_model/res18.pt'
 
 squeeze1_0_path = './trained_model/squeeze1_0.pt'
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-age_tensor = torch.tensor([i for i in range(1,101)]).type(torch.FloatTensor).to(device)
+age_tensor = torch.tensor([i for i in range(1, 101)]).type(torch.FloatTensor).to(device)
 
 
 def evaluate(model, batch_size=128):
-    writer = SummaryWriter() # logdir 설정
+    writer = SummaryWriter()  # logdir 설정
     loss_func = nn.L1Loss()
     model.eval()
+    model.to(device)
 
     test_data = datasets.ImageFolder(test_dir, transform=transforms.Compose(
         [transforms.Resize(255),
@@ -47,8 +48,9 @@ def evaluate(model, batch_size=128):
 
 
 def evaluate_models():
-    dense121=DenseNet.get_densenet161()
-    dense121.load_state_dict(torch.load('./trained_model/densenet161.pt'))
+    dense121 = DenseNet.get_densenet121()
+
+    dense121.load_state_dict(torch.load('./trained_model/dense121_2.pt'))
 
     evaluate(model=dense121, batch_size=64)
 
