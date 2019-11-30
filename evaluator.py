@@ -50,9 +50,10 @@ def evaluate(model, batch_size=128):
 def evaluate_models():
     dense121 = DenseNet.get_densenet121()
 
-    dense121.load_state_dict(torch.load('./trained_model/dense121_2.pt'))
+    dense121.load_state_dict(torch.load('./trained_model/densenet121 (4).pt'))
+    
 
-    evaluate(model=dense121, batch_size=64)
+    evaluate(model=dense121, batch_size=36)
 
 
 if __name__ == '__main__':
