@@ -2,11 +2,14 @@ import glob
 import os
 import shutil
 from random import shuffle
+import cv2
+import detector
 
 '''
 merging WIKI dataset and meagaAge asian dataset
 
 '''
+label_num = [0] * 100
 
 
 class ImagePreprocessor:
@@ -20,7 +23,7 @@ class ImagePreprocessor:
 
     def preprocess(self):
         self.preprocess_UTK()
-        # self.preprocess_megaage_asian()
+        self.preprocess_megaage_asian()
         # self.preprocess_megaage()
         # self.preprocess_wiki()
 
@@ -35,6 +38,7 @@ class ImagePreprocessor:
             print('preprocessing MegaAge data...' + fname)
 
             dir_name = mega_label[i]
+
             if not os.path.exists(self.completed_dir + 'train/' + dir_name):
                 os.makedirs(self.completed_dir + 'train/' + dir_name)
 
@@ -47,7 +51,7 @@ class ImagePreprocessor:
             mega_label_test = f.read().split('\n')
 
         for i, fname in enumerate(mega_fname_test):
-
+            break
             print('preprocessing MegaAge data...' + fname)
 
             if i < 4000:
@@ -72,23 +76,22 @@ class ImagePreprocessor:
             mega_label = f.read().split('\n')
 
         for i, fname in enumerate(mega_fname):
+            dir_name = mega_label[i]
+            age = int(dir_name)
 
-            print('preprocessing MegaAge data...' + fname)
+            faces, img_list = detector.face_detector(cv2.imread(mega_fname[i]))
 
-            if i < 36000:
-                dir_name = mega_label[i]
+            for fcs in img_list:
+                fcs = cv2.resize(fcs, dsize=(200, 200), interpolation=cv2.INTER_AREA)
+                print('preprocessing MegaAge data...' + fname)
                 if not os.path.exists(self.completed_dir + 'train/' + dir_name):
                     os.makedirs(self.completed_dir + 'train/' + dir_name)
 
+                if label_num[age - 1] > 1000:
+                    break
+                label_num[age - 1] += 1
                 dst = self.completed_dir + 'train/' + mega_label[i] + '/m' + str(i) + '.jpg'
-                shutil.copy2(fname, dst)
-            else:
-                dir_name = mega_label[i]
-                if not os.path.exists(self.completed_dir + 'validate/' + dir_name):
-                    os.makedirs(self.completed_dir + 'validate/' + dir_name)
-
-                dst = self.completed_dir + 'validate/' + mega_label[i] + '/m' + str(i) + '.jpg'
-                shutil.copy2(fname, dst)
+                cv2.imwrite(dst, fcs)
 
         mega_fname_test = [self.megaageasian_dir + 'test/' + str(name) + '.jpg' for name in range(1, 3946)]
 
@@ -96,7 +99,7 @@ class ImagePreprocessor:
             mega_label_test = f.read().split('\n')
 
         for i, fname in enumerate(mega_fname_test):
-
+            break
             print('preprocessing MegaAge data...' + fname)
 
             dir_name = mega_label_test[i]
@@ -123,7 +126,7 @@ class ImagePreprocessor:
                 continue
 
             age = pictured_date - birth_year
-            if age <= 0 or age > 100:
+            if age <=0 or age > 100:
                 continue
 
             dir_name = str(age)
@@ -147,7 +150,7 @@ class ImagePreprocessor:
             age = int(age_str)
             if age > 100:
                 age = 100
-            age_str=str(age)
+            age_str = str(age)
 
             if i < 20000:
                 dir = self.completed_dir + 'train/'
@@ -158,6 +161,11 @@ class ImagePreprocessor:
 
             if not os.path.exists(dir + age_str):
                 os.makedirs(dir + age_str)
+
+            if i < 20000:
+                if label_num[age - 1] > 1000:
+                    continue
+                label_num[age - 1] += 1
 
             shutil.copy2(fname, dir + age_str + '/u' + str(i) + '.jpg')
 

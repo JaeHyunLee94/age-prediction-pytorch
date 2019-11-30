@@ -24,10 +24,12 @@ def plot_data_districution():
 
     sns.set(color_codes=True)
     sns.distplot(y)
-    plt.title('MegaAge+MegaAge_asian+WikiCrop age distribution')
+
+    plt.title('Megaage_asian+WIKI_crop')
+    plt.axis([-10,110,0,0.0525])
     plt.xlabel('age')
     plt.ylabel('Num of Data')
-    plt.savefig('./out/mega_megaasian_wiki_distribution.jpg')
+    plt.savefig('./out/Megaage_asian_wikicrop.jpg')
     plt.show()
 
 

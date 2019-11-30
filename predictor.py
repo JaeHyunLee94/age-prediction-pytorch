@@ -4,9 +4,10 @@ import numpy as np
 import torchvision.transforms as transforms
 import torch.nn.functional as F
 from detector import face_detector
+import model.DenseNet as Densenet
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-age_tensor = torch.tensor([i for i in range(1,101)]).type(torch.FloatTensor).to(device)
+age_tensor = torch.tensor([i for i in range(1, 101)]).type(torch.FloatTensor).to(device)
 path_dir = './video/'
 
 
@@ -48,13 +49,11 @@ def predict_res18(img, res18_model):
 
 
 def real_time():
-    res18_path = './trained_model/squeeze1_0.pt'
-
-    res18_model = torch.load(res18_path)
-    res18_model.eval()
-
-    img=cv2.imread('./out/asian2.jpg')
-    cv2.imshow('sdf',predict_res18(img,res18_model))
+    dense121_path = './trained_model/densenet121 (4).pt'
+    dense121_model = Densenet.get_densenet121()
+    dense121_model.load_state_dict(torch.load(dense121_path))
+    dense121_model.to(device)
+    dense121_model.eval()
 
     cap = cv2.VideoCapture(0)
 
@@ -64,12 +63,11 @@ def real_time():
         ret, frame = cap.read()
 
         if ret:
-            if cv2.waitKey(20) & 0XFF == ord('q'):
+            if cv2.waitKey(3) & 0XFF == ord('q'):
                 break
-            cv2.imshow('webcam', predict_res18(frame, res18_model))
+            cv2.imshow('webcam', predict_res18(frame, dense121_model))
 
-        else:
-            break
+
 
     cap.release()
     cv2.destroyAllWindows()
