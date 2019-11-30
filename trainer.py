@@ -89,14 +89,14 @@ class Trainer:
         train_loader = DataLoader(train_data, batch_size=self.batch_size, shuffle=True)
 
         writer = SummaryWriter()
-        train_iter = 0
-        validation_iter = 0
+        iter = 0
 
         val_loss = 999
         threshold = 0
 
         for i in range(self.epoch):
             self.model.train()
+            train_loss = []
             for j, [image, label] in enumerate(train_loader, 1):
                 x = image.to(device)
                 y_ = label.type(torch.FloatTensor).to(device)
@@ -107,17 +107,17 @@ class Trainer:
                 loss = self.loss_func(output, y_)
                 loss.backward()
                 self.optimizer.step()
-
+                train_loss.append(loss.item())
                 print('Real time loss: ', loss)
                 print('Training Percesnt : --------{}%--------'.format(
                     100 * (self.batch_size * j + 20000 * i) / (self.epoch * 20000)))
 
-            writer.add_scalar('Loss/train', loss.item(), train_iter)
-            train_iter += 1
+            writer.add_scalar('Loss/train', sum(train_loss) / len(train_loss), iter)
+            iter += 1
             self.scheculer.step()
             val_loss_next = self.validate()
-            writer.add_scalar('Loss/Validation', val_loss_next.item(), train_iter)
-            validation_iter += 1
+            writer.add_scalar('Loss/Validation', val_loss_next, iter)
+            iter += 1
 
             if val_loss_next > val_loss:
                 print('Early stopping')
@@ -186,47 +186,29 @@ def train_models():
 
     inceptionv3_path = './trained_model/inceptionv3.pt'
 
-    vanila_model = VanilaCNN.get_vanila()
-    model_trainer = Trainer(vanila_model)
-    model_trainer.set_hyperparameter(batch_size=120)
+    densenet121_model = DenseNet.get_densenet121()
+    model_trainer = Trainer(densenet121_model)
+    model_trainer.set_hyperparameter(batch_size=36, lr=0.0015)
+    model_trainer.set_lr_schedule(5, 0.34)
     model_trainer.train()
-    torch.save(vanila_model, vanila_path)
-    del vanila_model, model_trainer
-
-    res18_model = Resnet.get_resnet18()
-    model_trainer = Trainer(res18_model)
-    model_trainer.set_hyperparameter(batch_size=256)
-    model_trainer.train()
-    torch.save(res18_model, res18_path)
-    del res18_model, model_trainer
-
-    res34_model = Resnet.get_resnet34()
-    model_trainer = Trainer(res34_model)
-    model_trainer.set_hyperparameter(batch_size=156)
-    model_trainer.train()
-    torch.save(res34_model, res34_path)
-    del res34_model, model_trainer
-
-    squeeze1_0_model = SqueezeNet.get_squeezenet1_0()
-    model_trainer = Trainer(squeeze1_0_model)
-    model_trainer.set_hyperparameter(batch_size=156)
-    model_trainer.train()
-    torch.save(squeeze1_0_model, squeeze1_0_path)
-    del squeeze1_0_model, model_trainer
+    torch.save(densenet121_model.state_dict(), densenet121_path)
+    del densenet121_model, model_trainer
 
     densenet121_model = DenseNet.get_densenet121()
     model_trainer = Trainer(densenet121_model)
-    model_trainer.set_hyperparameter(batch_size=36)
+    model_trainer.set_hyperparameter(batch_size=36, lr=0.0015)
+    model_trainer.set_lr_schedule(3, 0.45)
     model_trainer.train()
-    torch.save(densenet121_model, densenet121_path)
+    torch.save(densenet121_model.state_dict(), densenet121_path)
     del densenet121_model, model_trainer
 
-    vgg11_model = VGG.get_vgg11()
-    model_trainer = Trainer(vgg11_model)
-    model_trainer.set_hyperparameter(batch_size=36)
+    densenet161_model = DenseNet.get_densenet161()
+    model_trainer = Trainer(densenet161_model)
+    model_trainer.set_hyperparameter(batch_size=20, lr=0.0005)
+    model_trainer.set_lr_schedule(3, 0.6)
     model_trainer.train()
-    torch.save(vgg11_model, vgg11_path)
-    del vgg11_model, model_trainer
+    torch.save(densenet161_model.state_dict(), densenet161_path)
+    del densenet161_model, model_trainer
 
 
 if __name__ == '__main__':
