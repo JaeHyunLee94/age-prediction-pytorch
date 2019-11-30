@@ -204,7 +204,7 @@ def train_models():
 
     densenet161_model = DenseNet.get_densenet161()
     model_trainer = Trainer(densenet161_model)
-    model_trainer.set_hyperparameter(batch_size=20, lr=0.0005)
+    model_trainer.set_hyperparameter(batch_size=20, lr=0.0001)
     model_trainer.set_lr_schedule(3, 0.6)
     model_trainer.train()
     torch.save(densenet161_model.state_dict(), densenet161_path)
