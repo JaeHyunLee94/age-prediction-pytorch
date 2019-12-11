@@ -1,7 +1,9 @@
 video/
 raw_data/
 runs/
-preprocessed_data/
+preprocessed_data/train/
+preprocessed_data/test/
+preprocessed_data/validate/
 out/
 .idea/
 __pycache__/
