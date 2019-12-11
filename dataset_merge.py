@@ -22,7 +22,7 @@ class ImagePreprocessor:
         self.completed_dir = './preprocessed_data/'
 
     def preprocess(self):
-        self.preprocess_UTK()
+        # self.preprocess_UTK()
         self.preprocess_megaage_asian()
         # self.preprocess_megaage()
         # self.preprocess_wiki()
@@ -99,15 +99,25 @@ class ImagePreprocessor:
             mega_label_test = f.read().split('\n')
 
         for i, fname in enumerate(mega_fname_test):
-            break
-            print('preprocessing MegaAge data...' + fname)
 
-            dir_name = mega_label_test[i]
-            if not os.path.exists(self.completed_dir + 'test/' + dir_name):
-                os.makedirs(self.completed_dir + 'test/' + dir_name)
-            dst = self.completed_dir + 'test/' + mega_label_test[i] + '/ma' + str(i) + '.jpg'
+            dir_name = mega_label[i]
+            age = int(dir_name)
 
-            shutil.copy2(fname, dst)
+            faces, img_list = detector.face_detector(cv2.imread(mega_fname[i]))
+
+            if i < 2000:
+                dirr = 'test/'
+            else:
+                dirr = 'validate/'
+
+            for fcs in img_list:
+                fcs = cv2.resize(fcs, dsize=(200, 200), interpolation=cv2.INTER_AREA)
+                print('preprocessing MegaAge data...' + fname)
+                if not os.path.exists(self.completed_dir + dirr + dir_name):
+                    os.makedirs(self.completed_dir + dirr + dir_name)
+
+                dst = self.completed_dir + dirr + mega_label[i] + '/m' + str(i) + '.jpg'
+                cv2.imwrite(dst, fcs)
 
     def preprocess_wiki(self):
 
@@ -126,7 +136,7 @@ class ImagePreprocessor:
                 continue
 
             age = pictured_date - birth_year
-            if age <=0 or age > 100:
+            if age <= 0 or age > 100:
                 continue
 
             dir_name = str(age)
