@@ -7,4 +7,3 @@ out/
 __pycache__/
 data_distribution_fig/
 failed_model/
-trained_model/
