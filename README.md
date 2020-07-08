@@ -10,7 +10,7 @@
 This project is to estimate the age of various face from webcam or video streaming
 I didn't used Object detection model like Mask-RCNN
 
-Dataset: [MegaAge dataset](http://mmlab.ie.cuhk.edu.hk/projects/MegaAge/)
+Dataset: [MegaAge](http://mmlab.ie.cuhk.edu.hk/projects/MegaAge/)
 
 Face detection module: [OpenCV Haar Cascades face detection module](https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_objdetect/py_face_detection/py_face_detection.html)
 
